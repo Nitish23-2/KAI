@@ -12,12 +12,15 @@ async def test_chat_parses_assistant_tool_call() -> None:
         payload = json.loads(request.content)
         assert payload["model"] == "qwen3:4b"
         assert payload["options"]["num_ctx"] == 4096
+        assert payload["options"]["num_predict"] == 512
+        assert payload["think"] is False
         return httpx.Response(
             200,
             json={
                 "message": {
                     "role": "assistant",
                     "content": "",
+                    "thinking": "private model reasoning",
                     "tool_calls": [
                         {
                             "function": {
@@ -39,6 +42,7 @@ async def test_chat_parses_assistant_tool_call() -> None:
     message = await client.chat([], [])
 
     assert message.tool_calls[0].function.name == "get_current_datetime"
+    assert message.thinking == "private model reasoning"
 
 
 @pytest.mark.asyncio

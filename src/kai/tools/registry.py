@@ -33,7 +33,7 @@ class ToolRegistry:
             raise ValueError(f"Tool '{definition.name}' is already registered.")
         self._tools[definition.name] = definition
 
-    def schemas(self) -> list[dict[str, Any]]:
+    def schemas(self, names: set[str] | None = None) -> list[dict[str, Any]]:
         return [
             {
                 "type": "function",
@@ -44,6 +44,7 @@ class ToolRegistry:
                 },
             }
             for tool in self._tools.values()
+            if names is None or tool.name in names
         ]
 
     def execute(

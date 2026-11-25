@@ -17,6 +17,7 @@ class OllamaToolCall(BaseModel):
 class OllamaMessage(BaseModel):
     role: str
     content: str = ""
+    thinking: str = ""
     tool_calls: list[OllamaToolCall] = Field(default_factory=list)
 
 
@@ -110,7 +111,11 @@ class OllamaClient:
                 "messages": messages,
                 "tools": tools,
                 "stream": False,
-                "options": {"num_ctx": self.context_size},
+                "think": False,
+                "options": {
+                    "num_ctx": self.context_size,
+                    "num_predict": 512,
+                },
             },
         )
         try:

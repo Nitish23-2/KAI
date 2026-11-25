@@ -1,11 +1,11 @@
 # KAI
 
-KAI is a local-first personal AI assistant project. This first milestone provides
-a terminal assistant connected to Ollama, a validated tool registry, and SQLite
-storage for conversations and explicitly approved memories.
+KAI is a local-first personal AI assistant project. The v0.2 milestone adds
+persistent conversation management and structured, searchable personal memory
+to the Ollama-powered terminal assistant.
 
 The model can request only registered tools. It cannot execute Python or
-terminal commands. Browser opening and memory saving require confirmation in
+terminal commands. Browser opening and memory changes require confirmation in
 the terminal.
 
 ## Requirements
@@ -44,9 +44,22 @@ files automatically. See [docs/SETUP.md](docs/SETUP.md) for setting variables.
 - `/help` shows available commands.
 - `/reset` starts a new conversation; previous conversation records remain in
   SQLite.
+- `/conversations` lists active conversations; `/conversations all` includes
+  archived ones.
+- `/resume <id>` resumes a listed conversation.
+- `/title <title>` sets the current conversation title.
+- `/archive [id]` archives a conversation; archiving the current one starts a
+  fresh conversation.
 - `/exit` or `/quit` exits cleanly.
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for component boundaries and
+KAI stores memories by category (preferences, profile, education/work,
+projects, workflows, and explicit facts), detects exact normalized duplicates,
+and retrieves a small set of relevant memories using SQLite FTS5. Memory
+creation, updates, and deletion are approval-gated. KAI does not automatically
+extract personal information from chats.
+
+See [ARCHITECTURE.md](ARCHITECTURE.md) for schema and retrieval details,
+[docs/SETUP.md](docs/SETUP.md) for manual checks, and
 [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) for the roadmap.
 
 ## Tests
