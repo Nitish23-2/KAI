@@ -1,12 +1,12 @@
 import json
 import logging
 import re
-from typing import Any, Callable
+from typing import Any
 from uuid import uuid4
 
 from kai.ai.ollama import OllamaClient, OllamaError, OllamaMessage
 from kai.storage.repository import Repository
-from kai.tools.registry import ToolRegistry
+from kai.tools.registry import ApprovalCallback, ToolRegistry
 
 logger = logging.getLogger(__name__)
 
@@ -74,9 +74,14 @@ def _track_memory_tool_result(
     result_content: str,
     context_memories: dict[str, dict[str, Any]],
 ) -> None:
-    result = json.loads(result_content)
+    execution = json.loads(result_content)
+    if execution.get("status") != "succeeded":
+        return
+    result = execution.get("result")
+    if not isinstance(result, (dict, list)):
+        return
     if tool_name == "delete_memory":
-        if result.get("deleted"):
+        if isinstance(result, dict) and result.get("deleted"):
             context_memories.pop(result.get("memory_id"), None)
         return
     if tool_name not in {
@@ -259,7 +264,7 @@ class AssistantEngine:
         self,
         conversation_id: str,
         user_text: str,
-        confirm: Callable[[str, dict[str, Any]], bool],
+        confirm: ApprovalCallback,
     ) -> str:
         user_text = user_text.strip()
         if not user_text or len(user_text) > 10_000:
@@ -358,7 +363,7 @@ class AssistantEngine:
             )
 
             for call, call_id in zip(calls, call_ids):
-                result = self.registry.execute(
+                result = await self.registry.execute(
                     call.function.name, call.function.arguments, confirm
                 )
                 if result.succeeded:
@@ -366,9 +371,10 @@ class AssistantEngine:
                         result.name, result.content, context_memories
                     )
                 logger.info(
-                    "Tool call %s completed (success=%s)",
+                    "Tool call %s completed (status=%s, duration_ms=%.2f)",
                     result.name,
-                    result.succeeded,
+                    result.status.value,
+                    result.duration_ms,
                 )
                 tool_message = {
                     "role": "tool",

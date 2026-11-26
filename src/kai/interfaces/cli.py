@@ -1,7 +1,7 @@
 import asyncio
+import json
 import logging
 import sqlite3
-from typing import Any
 
 from kai.ai.engine import AssistantEngine
 from kai.ai.ollama import OllamaClient, OllamaError
@@ -10,13 +10,18 @@ from kai.logging_config import configure_logging
 from kai.storage.database import Database
 from kai.storage.repository import Repository
 from kai.tools.builtin import register_builtin_tools
-from kai.tools.registry import ToolRegistry
+from kai.tools.registry import ApprovalRequest, ToolRegistry
 
 logger = logging.getLogger(__name__)
 
 
-def _confirm_action(tool_name: str, arguments: dict[str, Any]) -> bool:
-    print(f"\nKAI requests permission to run '{tool_name}': {arguments}")
+def _confirm_action(request: ApprovalRequest) -> bool:
+    arguments = json.loads(request.arguments_json)
+    print(
+        f"\nKAI requests permission to run '{request.tool_name}' "
+        f"(risk: {request.risk.value}) with validated arguments:"
+    )
+    print(json.dumps(arguments, ensure_ascii=True, indent=2))
     try:
         answer = input("Allow this action? [y/N]: ").strip().lower()
     except (EOFError, KeyboardInterrupt):

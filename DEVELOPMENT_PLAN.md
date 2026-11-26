@@ -39,8 +39,10 @@
 
 1. **Service boundary:** add FastAPI health/chat endpoints and a desktop-ready
    API only when a second interface needs them.
-2. **Reliable tool orchestration:** introduce per-tool permissions, timeouts,
-   audit records, and safer approval UX as the tool set grows.
+2. **v0.3 computer intelligence:** tool execution and permission contracts are
+   complete in 0.3.1. Next implement allowlisted Windows app and scoped file
+   operations (0.3.2), then isolated read-only Playwright browser tools (0.3.3).
+   Browser and UI automation dependencies remain optional.
 3. **Memory improvements:** evaluate richer multilingual/semantic retrieval
    only if lexical search is insufficient; keep automatic extraction opt-in.
 4. **Computer automation:** add Playwright behind a constrained browser tool

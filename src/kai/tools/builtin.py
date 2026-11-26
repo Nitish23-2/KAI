@@ -6,7 +6,12 @@ import webbrowser
 from pydantic import AnyHttpUrl, BaseModel, ConfigDict, Field, field_validator
 
 from kai.storage.repository import Repository
-from kai.tools.registry import ToolDefinition, ToolRegistry
+from kai.tools.registry import (
+    ApprovalPolicy,
+    ToolDefinition,
+    ToolRegistry,
+    ToolRisk,
+)
 
 MemoryCategory = Literal[
     "user_preference",
@@ -199,6 +204,8 @@ def register_builtin_tools(
             description="Get the current local date, time, and timezone.",
             arguments_model=NoArguments,
             handler=current_datetime,
+            risk=ToolRisk.READ_ONLY,
+            approval_policy=ApprovalPolicy.NEVER,
         )
     )
     registry.register(
@@ -210,7 +217,8 @@ def register_builtin_tools(
             ),
             arguments_model=OpenWebsiteArguments,
             handler=open_website,
-            requires_confirmation=True,
+            risk=ToolRisk.MODERATE,
+            approval_policy=ApprovalPolicy.ALWAYS,
         )
     )
     registry.register(
@@ -223,7 +231,8 @@ def register_builtin_tools(
             ),
             arguments_model=SaveMemoryArguments,
             handler=save_memory,
-            requires_confirmation=True,
+            risk=ToolRisk.HIGH,
+            approval_policy=ApprovalPolicy.ALWAYS,
         )
     )
     registry.register(
@@ -235,6 +244,8 @@ def register_builtin_tools(
             ),
             arguments_model=SearchMemoriesArguments,
             handler=search_memories,
+            risk=ToolRisk.READ_ONLY,
+            approval_policy=ApprovalPolicy.NEVER,
         )
     )
     registry.register(
@@ -246,6 +257,8 @@ def register_builtin_tools(
             ),
             arguments_model=ListMemoriesArguments,
             handler=list_memories,
+            risk=ToolRisk.READ_ONLY,
+            approval_policy=ApprovalPolicy.NEVER,
         )
     )
     registry.register(
@@ -257,7 +270,8 @@ def register_builtin_tools(
             ),
             arguments_model=UpdateMemoryArguments,
             handler=update_memory,
-            requires_confirmation=True,
+            risk=ToolRisk.HIGH,
+            approval_policy=ApprovalPolicy.ALWAYS,
         )
     )
     registry.register(
@@ -269,7 +283,8 @@ def register_builtin_tools(
             ),
             arguments_model=MemoryIdArguments,
             handler=delete_memory,
-            requires_confirmation=True,
+            risk=ToolRisk.HIGH,
+            approval_policy=ApprovalPolicy.ALWAYS,
         )
     )
     registry.register(
@@ -281,6 +296,8 @@ def register_builtin_tools(
             ),
             arguments_model=ListConversationsArguments,
             handler=list_conversations,
+            risk=ToolRisk.READ_ONLY,
+            approval_policy=ApprovalPolicy.NEVER,
         )
     )
     registry.register(
@@ -292,6 +309,8 @@ def register_builtin_tools(
             ),
             arguments_model=SearchConversationsArguments,
             handler=search_conversations,
+            risk=ToolRisk.READ_ONLY,
+            approval_policy=ApprovalPolicy.NEVER,
         )
     )
     registry.register(
@@ -303,5 +322,7 @@ def register_builtin_tools(
             ),
             arguments_model=GetConversationArguments,
             handler=get_conversation,
+            risk=ToolRisk.READ_ONLY,
+            approval_policy=ApprovalPolicy.NEVER,
         )
     )

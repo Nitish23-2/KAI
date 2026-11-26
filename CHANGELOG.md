@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.3.1 - Tool execution and permission contracts
+
+- Added required risk and approval metadata for every registered tool.
+- Bound approval to canonical validated arguments and showed risk and exact
+  arguments in the CLI prompt.
+- Standardized tool outcomes for success, denial, validation failure, timeout,
+  and execution failure.
+- Added bounded handler execution deadlines; timeouts explicitly report that a
+  synchronous or asynchronous operation may still be running.
+- Await async approval callbacks, fail closed for absent/indeterminate
+  decisions, and require a fresh approval for each invocation.
+- Kept existing tool round/call limits and added regression tests for approval,
+  timeout, failure, and legacy tool behavior.
+
 ## 0.2.0 - Persistent intelligence and personal memory
 
 - Added backward-compatible SQLite migration, titled/archivable conversations,

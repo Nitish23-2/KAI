@@ -25,7 +25,8 @@ Repository ---- SQLite conversations, messages, memories, FTS5 indexes
 - `ai/engine.py`: supplies bounded recent history, relevant saved memories,
   system policy, and tool definitions; limits tool-call rounds and calls.
 - `tools/registry.py`: allow-lists tools, derives JSON schemas from Pydantic
-  models, validates arguments, and enforces confirmation requirements.
+  models, validates arguments, applies explicit risk/approval policies, and
+  bounds tool execution.
 - `tools/builtin.py`: implements local time, website opening, structured memory
   operations, and historical conversation lookup.
 - `storage/database.py` and `storage/repository.py`: create/migrate the SQLite
@@ -73,13 +74,29 @@ personal details unless the user explicitly asks it to remember them.
 ## Safety and trust boundaries
 
 The model can only select tools registered by application code. Every tool
-argument is validated before its handler runs. The website tool accepts only
-HTTP(S) URLs and asks the user before launching a browser; memory changes also
-require explicit user confirmation. Historical messages, conversation search
-results, tool outputs, and other external content are treated as untrusted data,
-not instructions. Website text is not fetched or injected into the model.
-Conversation and memory data remain in the local SQLite database (stored as
-local plaintext).
+argument is validated before its handler runs, and every tool declares a risk
+classification and approval policy. High-risk tools cannot be registered
+without mandatory approval. Approval receives the tool name, risk, and
+canonical JSON of the exact validated arguments that the handler will receive.
+An approval callback must explicitly return `True`; a missing, false,
+indeterminate, failed, or timed-out decision denies execution. Approval is
+requested again for each tool invocation.
+The website tool accepts only HTTP(S) URLs and requires approval before
+launching a browser; memory changes also require approval.
+
+Tool results use a common status envelope: `succeeded`, `denied`,
+`validation_failure`, `timeout`, or `execution_failure`. Synchronous handlers
+run in a worker thread and asynchronous handlers run as tasks, both with
+bounded deadlines. A timeout does not cancel either kind of operation; it
+explicitly reports `operation_may_still_be_running` and retains the task to
+observe its eventual outcome without logging its result. Retrying an action
+requires a new approval when the tool policy requires approval. The engine
+continues to cap tool rounds and calls per request.
+
+Historical messages, conversation search results, tool outputs, and other
+external content are treated as untrusted data, not instructions. Website text
+is not fetched or injected into the model. Conversation and memory data remain
+in the local SQLite database (stored as local plaintext).
 
 ## Deliberately deferred
 

@@ -5,8 +5,9 @@ persistent conversation management and structured, searchable personal memory
 to the Ollama-powered terminal assistant.
 
 The model can request only registered tools. It cannot execute Python or
-terminal commands. Browser opening and memory changes require confirmation in
-the terminal.
+terminal commands. Every tool has a declared risk and approval policy.
+Approval-gated actions display the validated arguments and risk in the
+terminal. Browser opening and memory changes require confirmation.
 
 ## Requirements
 
@@ -61,6 +62,12 @@ extract personal information from chats.
 See [ARCHITECTURE.md](ARCHITECTURE.md) for schema and retrieval details,
 [docs/SETUP.md](docs/SETUP.md) for manual checks, and
 [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) for the roadmap.
+
+Tool execution has bounded deadlines and standardized result statuses. If a
+handler exceeds its deadline, KAI reports that it may still be running rather
+than claiming it was cancelled. Approval must explicitly return `True` and is
+requested again for each invocation. Browser and Windows automation are not
+part of this milestone.
 
 ## Tests
 
